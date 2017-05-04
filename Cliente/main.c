@@ -17,17 +17,17 @@
 #define ERRO -1
 #define TAMMAX 1024 //tamanho maximo da string
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
 
     char ip[16];
     int porta;
     char arquivo[1024];
     char msgrecv[1024];
 
-
     if (argc != 4)
     {
-        printf("Utilize: './cliente 127.0.0.1 1234 /tmp/repositorio'\n");
+        printf("Utilize: ./cliente [IP DO SERVIDOR] [PORTA] [NOME DO ARQUIVO]\n");
         exit(-1);
     }
     /*Pega a porta nos parâmetros passados*/
@@ -43,7 +43,6 @@ int main(int argc, char *argv[]) {
     pthread_t thread;
     int threadStatus;
 
-
     /*CRIAR UM NOVO SOCKET COM OS PARAMETROS:
     -'AF_INET'=Endereçamento IPv4
     -'SOCK_STREAM'=Este tipo de socket permite uma conexão bidirecional,
@@ -57,13 +56,14 @@ int main(int argc, char *argv[]) {
     sock = socket(AF_INET, SOCK_STREAM, 0);
 
     //se o socket retornar -1 (ERRO), então avisa e finaliza
-    if (sock == ERRO) {
+    if (sock == ERRO)
+    {
         perror("Socket");
         exit(0);
     }
 
     //preenche a estrutura com zeros
-    bzero((char *) &network, sizeof (network));
+    bzero((char *)&network, sizeof(network));
 
     //coloca o tipo de protocolo IPv4 na variável
     network.sin_family = PF_INET;
@@ -80,18 +80,19 @@ int main(int argc, char *argv[]) {
     network.sin_addr.s_addr = inet_addr(ip);
 
     //pega o tamanho da variável
-    strucsize = sizeof (network);
+    strucsize = sizeof(network);
 
     /*inicia a conexão no socket 'sock' */
-    resp = connect(sock, (struct sockaddr *) &network, strucsize);
-    if (resp == ERRO) {
+    resp = connect(sock, (struct sockaddr *)&network, strucsize);
+    if (resp == ERRO)
+    {
         perror("Connect");
         exit(0);
     }
 
     /*Seta opções do socket*/
     int optval = 65535;
-    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof (optval)) == -1)
+    if (setsockopt(sock, SOL_SOCKET, SO_REUSEADDR, &optval, sizeof(optval)) == -1)
         printf("setsockopt() failed");
 
     /*Imprime que foi conectado*/
@@ -100,17 +101,28 @@ int main(int argc, char *argv[]) {
     //envia nome do arquivo para o servidor
     send(sock, arquivo, strlen(arquivo), 0);
 
+    FILE *arq = fopen(arquivo, "w");
+    if (arq == NULL)
+    {
+        printf("Erro, nao foi possivel abrir o arquivo\n");
+        close(sock);
+        exit(0);
+    }
     //recebe o arquivo
     bzero(msgrecv, strlen(msgrecv));
-    while (1) {
-        if (recv(sock, msgrecv, TAMMAX, 0) > 0) {
+    while (1)
+    {
+        if (recv(sock, msgrecv, TAMMAX, 0) > 0)
+        {
             fprintf(stdout, "%s", msgrecv);
+            fprintf(arq, "%s", msgrecv);
             bzero(msgrecv, strlen(msgrecv));
-        } else
-        break;
+        }
+        else
+            break;
     }
     close(sock);
-    
     //fecha o arquivo
+    fclose(arq);
     exit(0);
 }

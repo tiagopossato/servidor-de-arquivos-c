@@ -28,7 +28,7 @@ void *Recebe(void *sck)
     char *linha = malloc(1024);
     int qtd = 0;
 
-fprintf(stdout, "Socket: %d\n", socket);
+    fprintf(stdout, "Socket: %d\n", socket);
 
     bzero(msgrecv, strlen(msgrecv));
 
@@ -42,7 +42,6 @@ fprintf(stdout, "Socket: %d\n", socket);
         free(linha);
         return;
     }
-  
 
     sprintf(arquivo, "%s%s\0", pasta, msgrecv);
     fprintf(stdout, "%s solicitado.\n", arquivo);
@@ -58,13 +57,14 @@ fprintf(stdout, "Socket: %d\n", socket);
         free(linha);
         return;
     }
-    while((fgets(linha, sizeof(linha), arq))!=NULL){
+    while ((fgets(linha, sizeof(linha), arq)) != NULL)
+    {
         //le uma linha do arquivo
         send(socket, linha, strlen(linha), 0);
         bzero(linha, strlen(linha));
     }
     //fecha tudo
-    fclose(arq);                 
+    fclose(arq);
     close(socket);
     free(msgrecv);
     free(arquivo);
@@ -85,13 +85,12 @@ void main(int argc, char *argv[])
     // }
     if (argc != 3)
     {
-        printf("Utilize: './servidor 1234 /tmp/repositorio'\n");
+        printf("Utilize: ./servidor [PORTA] [PASTA DOS ARQUIVOS]\n");
         exit(-1);
     }
     /*Pega a porta nos parâmetros passados*/
     porta = atoi(argv[1]);
     sprintf(pasta, "%s", argv[2]);
-
 
     /*cria a estrutura para o socket local*/
     struct sockaddr_in local, network;
